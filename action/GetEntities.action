@@ -1,0 +1,5 @@
+# optional area within which the entities should exist
+geometry_msgs/Polygon area
+---
+ed/EntityInfo[] entities
+---

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>ed_entity_server</name>
+  <version>0.0.0</version>
+  <description>Advertises action servers for accessing ED entities</description>
+
+  <maintainer email="santosh.thoduka@h-brs.de">Santosh Thoduka</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>ed</build_depend>
+  <build_depend>message_generation</build_depend>
+
+  <run_depend>ed</run_depend>
+  <run_depend>message_runtime</run_depend>
+
+</package>
