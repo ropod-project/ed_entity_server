@@ -16,10 +16,12 @@ EntityServerPlugin::~EntityServerPlugin()
 void EntityServerPlugin::initialize(ed::InitData& init)
 {
     init.properties.registerProperty("Feature", feature_properties, new FeaturPropertiesInfo);
-    ros::NodeHandle nh("~");
 
-    cart_mobidik_width = 0.72; 	// [m]
-    cart_mobidik_margin = 0.22; // [m]
+    tue::Configuration& config = init.config;
+    config.value("cart_mobidik_width", cart_mobidik_width, tue::REQUIRED); // [m]
+    config.value("cart_mobidik_margin", cart_mobidik_margin, tue::REQUIRED); // [m]
+
+    ros::NodeHandle nh("~");
 
     nh.setCallbackQueue(&cb_queue);
     toggle_publisher_srv = nh.advertiseService("toggle_object_publisher", &EntityServerPlugin::toggleObjectPublisher, this);
