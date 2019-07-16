@@ -24,7 +24,7 @@ void EntityServerPlugin::initialize(ed::InitData& init)
     nh.setCallbackQueue(&cb_queue);
     toggle_publisher_srv = nh.advertiseService("toggle_object_publisher", &EntityServerPlugin::toggleObjectPublisher, this);
     get_entities_as.reset(
-            new actionlib::SimpleActionServer<ed_entity_server::GetEntitiesAction>(
+            new actionlib::SimpleActionServer<ropod_ros_msgs::GetObjectsAction>(
                 nh,
                 "get_entities",
                 boost::bind(&EntityServerPlugin::getEntitiesCallback, this, _1),
@@ -42,26 +42,28 @@ void EntityServerPlugin::process(const ed::PluginInput& data, ed::UpdateRequest&
         entities.push_back(e);
     }
 
+    /* Process potential detections. So the below queued queries get fresh results. */
+    detectMobiDik(entities, req);
+
     cb_queue.callAvailable();
 
     if (publisher_enabled)
     {
         publishFilteredEntities();
     }
-
-    detectMobiDik(entities, req);
 }
 
-void EntityServerPlugin::getEntitiesCallback(const ed_entity_server::GetEntitiesGoalConstPtr &goal)
+void EntityServerPlugin::getEntitiesCallback(const ropod_ros_msgs::GetObjectsGoalConstPtr &goal)
 {
     ROS_INFO_STREAM("Received request for entities");
-    ed_entity_server::GetEntitiesResult result;
+    ropod_ros_msgs::GetObjectsResult result;
     std::vector<ed::EntityConstPtr> filtered_entities = filterEntities(goal->type, goal->area);
     for (int i = 0; i < filtered_entities.size(); i++)
     {
-        ed::EntityInfo msg;
+        ropod_ros_msgs::Object msg;
+
         copyEntityToMsg(filtered_entities[i], msg);
-        result.entities.push_back(msg);
+        result.objects.push_back(msg);
     }
     get_entities_as->setSucceeded(result);
 }
@@ -95,61 +97,56 @@ void EntityServerPlugin::publishFilteredEntities()
 }
 
 // TODO: change this to ropod_ros_msgs/Object message
-void EntityServerPlugin::copyEntityToMsg(const ed::EntityConstPtr &e, ed::EntityInfo &msg)
+void EntityServerPlugin::copyEntityToMsg(const ed::EntityConstPtr &e, ropod_ros_msgs::Object &msg)
 {
     msg.id = e->id().str();
     msg.type = e->type();
-    msg.existence_probability = e->existenceProbability();
+    //msg.existence_probability = e->existenceProbability();
 
     if (e->has_pose())
     {
-        msg.pose.position.x = e->pose().getOrigin().x;
-        msg.pose.position.y = e->pose().getOrigin().y;
-        msg.pose.position.z = e->pose().getOrigin().z;
-        msg.pose.orientation.x = e->pose().getQuaternion().x;
-        msg.pose.orientation.y = e->pose().getQuaternion().y;
-        msg.pose.orientation.z = e->pose().getQuaternion().z;
-        msg.pose.orientation.w = e->pose().getQuaternion().w;
-        msg.has_pose = true;
+        msg.pose.pose.position.x = e->pose().getOrigin().x;
+        msg.pose.pose.position.y = e->pose().getOrigin().y;
+        msg.pose.pose.position.z = e->pose().getOrigin().z;
+        msg.pose.pose.orientation.x = e->pose().getQuaternion().x;
+        msg.pose.pose.orientation.y = e->pose().getQuaternion().y;
+        msg.pose.pose.orientation.z = e->pose().getQuaternion().z;
+        msg.pose.pose.orientation.w = e->pose().getQuaternion().w;
     }
     else
     {
-        msg.has_pose = false;
+
     }
 
-    if (!e->shape())
-    {
-        const ed::ConvexHull& ch = e->convexHull();
-
-        if (!ch.points.empty())
-        {
-            msg.z_min = ch.z_min;
-            msg.z_max = ch.z_max;
-
-            unsigned int size = ch.points.size();
-
-            for(unsigned int i = 0; i < size; ++i)
-            {
-                geometry_msgs::Point p;
-                p.x = ch.points[i].x;
-                p.y = ch.points[i].y;
-                p.z = 0.0;
-                msg.convex_hull.push_back(p);
-            }
-        }
-    }
-
-    std::set<std::string> flags = e->flags();
-    for (std::set<std::string>::iterator it = flags.begin(); it != flags.end(); ++it)
-    {
-        msg.flags.push_back(*it);
-    }
-
-    std::set<ed::TYPE> types = e->types();
-    for (std::set<ed::TYPE>::iterator it = types.begin(); it != types.end(); ++it)
-    {
-        msg.types.push_back(*it);
-    }
+//    if (!e->shape())
+//    {
+//        const ed::ConvexHull& ch = e->convexHull();
+//
+//        if (!ch.points.empty())
+//        {
+//
+//            for(unsigned int i = 0; i < ch.points.size(); ++i)
+//            {
+//                geometry_msgs::Point p;
+//                p.x = ch.points[i].x;
+//                p.y = ch.points[i].y;
+//                p.z = 0.0;
+//                msg.shape.push_back(p);
+//            }
+//        }
+//    }
+//
+//    std::set<std::string> flags = e->flags();
+//    for (std::set<std::string>::iterator it = flags.begin(); it != flags.end(); ++it)
+//    {
+//        msg.flags.push_back(*it);
+//    }
+//
+//    std::set<ed::TYPE> types = e->types();
+//    for (std::set<ed::TYPE>::iterator it = types.begin(); it != types.end(); ++it)
+//    {
+//        msg.types.push_back(*it);
+//    }
 }
 
 std::vector<ed::EntityConstPtr> EntityServerPlugin::filterEntities(const std::string &type, const geometry_msgs::Polygon &area)
