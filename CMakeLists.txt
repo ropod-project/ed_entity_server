@@ -7,6 +7,8 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   message_generation
   actionlib
+  ed_sensor_integration
+  ropod_ros_msgs
 )
 
 add_action_files(
