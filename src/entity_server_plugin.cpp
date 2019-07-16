@@ -21,9 +21,12 @@ void EntityServerPlugin::initialize(ed::InitData& init)
     config.value("cart_mobidik_width", cart_mobidik_width, tue::REQUIRED); // [m]
     config.value("cart_mobidik_margin", cart_mobidik_margin, tue::REQUIRED); // [m]
 
-    ros::NodeHandle nh("~");
+    publisher_enabled = false;
 
+    ros::NodeHandle nh("~");
     nh.setCallbackQueue(&cb_queue);
+
+    entities_pub = nh.advertise<ropod_ros_msgs::ObjectList>("/ed/objects", 1);
     toggle_publisher_srv = nh.advertiseService("toggle_object_publisher", &EntityServerPlugin::toggleObjectPublisher, this);
     get_entities_as.reset(
             new actionlib::SimpleActionServer<ropod_ros_msgs::GetObjectsAction>(
@@ -74,7 +77,9 @@ bool EntityServerPlugin::toggleObjectPublisher(ropod_ros_msgs::ToggleObjectPubli
 {
     if (req.enable_publisher == true)
     {
-        if (std::find(supported_types.begin(), supported_types.end(), req.publisher_type) != supported_types.end())
+        if (std::find(supported_types.begin(), supported_types.end(), req.publisher_type) != supported_types.end() ||
+           req.publisher_type.empty() ||
+           req.publisher_type == "*")
         {
             objects_type = req.publisher_type;
             objects_area = req.area;
@@ -83,7 +88,8 @@ bool EntityServerPlugin::toggleObjectPublisher(ropod_ros_msgs::ToggleObjectPubli
         }
         else
         {
-            return res.success = false;
+            res.success = false;
+            return true;
         }
     }
     else
@@ -91,11 +97,20 @@ bool EntityServerPlugin::toggleObjectPublisher(ropod_ros_msgs::ToggleObjectPubli
         publisher_enabled = false;
         res.success = true;
     }
+    return true;
 }
 
 void EntityServerPlugin::publishFilteredEntities()
 {
     std::vector<ed::EntityConstPtr> filtered_entities = filterEntities(this->objects_type, this->objects_area);
+    ropod_ros_msgs::ObjectList object_list;
+    for (int i = 0; i < filtered_entities.size(); i++)
+    {
+        ropod_ros_msgs::Object msg;
+        copyEntityToMsg(filtered_entities[i], msg);
+        object_list.objects.push_back(msg);
+    }
+    entities_pub.publish(object_list);
 }
 
 // TODO: change this to ropod_ros_msgs/Object message
