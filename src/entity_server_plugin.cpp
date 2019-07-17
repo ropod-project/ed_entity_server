@@ -123,6 +123,8 @@ void EntityServerPlugin::copyEntityToMsg(const ed::EntityConstPtr &e, ropod_ros_
 
     if (e->has_pose())
     {
+        msg.pose.header.frame_id = "map";
+        msg.pose.header.stamp = ros::Time::now();
         msg.pose.pose.position.x = e->pose().getOrigin().x;
         msg.pose.pose.position.y = e->pose().getOrigin().y;
         msg.pose.pose.position.z = e->pose().getOrigin().z;
