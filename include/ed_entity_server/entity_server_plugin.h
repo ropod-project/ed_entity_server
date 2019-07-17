@@ -11,7 +11,6 @@
 #include <ropod_ros_msgs/ToggleObjectPublisher.h>
 #include <actionlib/server/simple_action_server.h>
 #include <ropod_ros_msgs/GetObjectsAction.h>
-//#include <ed_entity_server/GetEntitiesAction.h>
 #include <ed_sensor_integration/properties/featureProperties_info.h>
 
 

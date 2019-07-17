@@ -11,11 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   ropod_ros_msgs
 )
 
-add_action_files(
-  FILES
-    GetEntities.action
-)
-
 add_service_files(
   FILES
     SwitchPublisher.srv

@@ -1,6 +1,0 @@
-# optional area within which the entities should exist
-string type
-geometry_msgs/Polygon area
----
-ed/EntityInfo[] entities
----
