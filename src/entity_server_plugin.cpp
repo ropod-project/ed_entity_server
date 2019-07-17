@@ -258,7 +258,7 @@ std::vector<ed::EntityConstPtr> EntityServerPlugin::getCarts(const std::vector<e
     for (int i = 0; i < entities.size(); i++)
     {
 		const ed::EntityConstPtr& e = entities[i];
-		if(e->hasFlag("Mobidik"))
+		if(e->hasFlag("cart"))
 		{
 			carts.push_back(e);
 		}
@@ -325,7 +325,7 @@ void EntityServerPlugin::detectMobiDik(const std::vector<ed::EntityConstPtr> &en
 			ROS_DEBUG_STREAM ("Mobidik found for entity = " << e->id() << std::endl);
 			/* NOTE: This "Mobidik" flag is important for visualization.
 			 * Thus, it must be processes independent of queries. */
-			req.setFlag(e->id(), "Mobidik"); //TODO check if it exists already?
+			req.setFlag(e->id(), "cart"); //TODO check if it exists already?
 		}
     }
 }

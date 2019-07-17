@@ -17,12 +17,6 @@ bool isPointInPolygon(const std::vector<geometry_msgs::Point32> &polygon,
             num_intersections++;
         }
     }
-    // check last segment
-    if(isPointBetweenPointsInY(point, polygon[polygon.size() - 1], polygon[0]) &&
-       doesPointIntersectSegmentOnRight(point, polygon[polygon.size() - 1], polygon[0]))
-    {
-        num_intersections++;
-    }
 
     if (num_intersections % 2 == 0)
     {
