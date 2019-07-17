@@ -32,7 +32,7 @@ void EntityServerPlugin::initialize(ed::InitData& init)
     get_entities_as.reset(
             new actionlib::SimpleActionServer<ropod_ros_msgs::GetObjectsAction>(
                 nh,
-                "get_entities",
+                "/ed/get_objects",
                 boost::bind(&EntityServerPlugin::getEntitiesCallback, this, _1),
                 false));
     get_entities_as->start();
