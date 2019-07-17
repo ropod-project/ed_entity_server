@@ -315,8 +315,7 @@ void EntityServerPlugin::detectMobiDik(const std::vector<ed::EntityConstPtr> &en
 		}
 
     	/* Detect Mobidik by its dimensions */
-	    ed::PropertyKey<ed::tracking::FeatureProperties> featureProperties;
-    	ed::tracking::FeatureProperties property = e->property ( featureProperties );
+    	ed::tracking::FeatureProperties property = e->property (feature_properties);
 		if ( property.getFeatureProbabilities().get_pRectangle() > property.getFeatureProbabilities().get_pCircle() && // Dimension check
 				property.rectangle_.get_d() < cart_mobidik_width + cart_mobidik_margin &&
 				property.rectangle_.get_w() < cart_mobidik_width + cart_mobidik_margin &&
