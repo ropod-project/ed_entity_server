@@ -1,4 +1,5 @@
 #include <ed_entity_server/entity_server_plugin.h>
+#include <ed_entity_server/utils.h>
 
 #include <ed/entity.h>
 #include <ed/world_model.h>
@@ -267,8 +268,12 @@ std::vector<ed::EntityConstPtr> EntityServerPlugin::getCarts(const std::vector<e
 
 bool EntityServerPlugin::isEntityInPolygon(const ed::EntityConstPtr &entity, const std::vector<geometry_msgs::Point32> &polygon)
 {
-    // TODO: implement this
-    return true;
+    ed::tracking::FeatureProperties property = entity->property(feature_properties);
+    geometry_msgs::Point32 entity_center;
+    entity_center.x = property.getRectangle().get_x();
+    entity_center.y = property.getRectangle().get_y();
+    // defined in utils.h
+    return isPointInPolygon(polygon, entity_center);
 }
 
 bool EntityServerPlugin::isRectangle(const ed::EntityConstPtr &entity)
@@ -290,6 +295,7 @@ bool EntityServerPlugin::isCircle(const ed::EntityConstPtr &entity)
     }
     return false;
 }
+
 
 void EntityServerPlugin::detectMobiDik(const std::vector<ed::EntityConstPtr> &entities, ed::UpdateRequest& req)
 {

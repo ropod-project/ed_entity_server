@@ -52,18 +52,19 @@ protected:
     std::vector<ed::EntityConstPtr> filterCircles(const std::vector<ed::EntityConstPtr> &entities);
     std::vector<ed::EntityConstPtr> getCartCandidates(const std::vector<ed::EntityConstPtr> &entities);
     std::vector<ed::EntityConstPtr> getCarts(const std::vector<ed::EntityConstPtr> &entities);
+    void detectMobiDik(const std::vector<ed::EntityConstPtr> &entities, ed::UpdateRequest& req);
 
-private:
+    // ROS callbacks
     void getEntitiesCallback(const ropod_ros_msgs::GetObjectsGoalConstPtr &goal);
+    bool toggleObjectPublisher(ropod_ros_msgs::ToggleObjectPublisher::Request &req, ropod_ros_msgs::ToggleObjectPublisher::Response &res);
+    void publishFilteredEntities();
+
+    void copyEntityToMsg(const ed::EntityConstPtr &e, ropod_ros_msgs::Object &msg);
+    std::vector<ed::EntityConstPtr> filterEntities(const std::string &type, const geometry_msgs::Polygon &area);
+
     bool isEntityInPolygon(const ed::EntityConstPtr &entity, const std::vector<geometry_msgs::Point32> &polygon);
     bool isRectangle(const ed::EntityConstPtr &entity);
     bool isCircle(const ed::EntityConstPtr &entity);
-    void copyEntityToMsg(const ed::EntityConstPtr &e, ropod_ros_msgs::Object &msg);
-
-    std::vector<ed::EntityConstPtr> filterEntities(const std::string &type, const geometry_msgs::Polygon &area);
-    bool toggleObjectPublisher(ropod_ros_msgs::ToggleObjectPublisher::Request &req, ropod_ros_msgs::ToggleObjectPublisher::Response &res);
-    void publishFilteredEntities();
-    void detectMobiDik(const std::vector<ed::EntityConstPtr> &entities, ed::UpdateRequest& req);
 };
 
 #endif

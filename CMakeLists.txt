@@ -41,6 +41,7 @@ include_directories(
 
 add_library(ed_entity_server_plugin
   src/entity_server_plugin.cpp
+  src/utils.cpp
 )
 target_link_libraries(ed_entity_server_plugin
     ${catkin_LIBRARIES}
