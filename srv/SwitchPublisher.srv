@@ -1,5 +1,0 @@
-string publisher_type
-# true to start publisher, false to stop publisher
-bool start
----
-bool success

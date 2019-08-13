@@ -138,6 +138,40 @@ void EntityServerPlugin::copyEntityToMsg(const ed::EntityConstPtr &e, ropod_ros_
 
     }
 
+    ed::tracking::FeatureProperties property = e->property(feature_properties);
+    // only set shape for rectangular objects
+    if (property.getFeatureProbabilities().get_pRectangle() > property.getFeatureProbabilities().get_pCircle())
+    {
+        double x, y, w, d, yaw;
+        x = property.getRectangle().get_x();
+        y = property.getRectangle().get_y();
+        w = property.getRectangle().get_w();
+        d = property.getRectangle().get_d();
+        yaw = property.getRectangle().get_yaw();
+        double yaw_top_left = yaw + (M_PI / 4.0);
+        double yaw_top_right = yaw - (M_PI / 4.0);
+        double yaw_bottom_left = yaw + (3 * M_PI / 4.0);
+        double yaw_bottom_right = yaw - (3 * M_PI / 4.0);
+        double diagonal_length = std::sqrt(std::pow(w, 2.0) + std::pow(d, 2.0)) / 2.0;
+        geometry_msgs::Point32 tl;
+        geometry_msgs::Point32 tr;
+        geometry_msgs::Point32 bl;
+        geometry_msgs::Point32 br;
+        tl.x = diagonal_length * std::cos(yaw_top_left);
+        tl.y = diagonal_length * std::sin(yaw_top_left);
+        tr.x = diagonal_length * std::cos(yaw_top_right);
+        tr.y = diagonal_length * std::sin(yaw_top_right);
+        bl.x = diagonal_length * std::cos(yaw_bottom_left);
+        bl.y = diagonal_length * std::sin(yaw_bottom_left);
+        br.x = diagonal_length * std::cos(yaw_bottom_right);
+        br.y = diagonal_length * std::sin(yaw_bottom_right);
+        msg.shape.polygon.points.push_back(tr);
+        msg.shape.polygon.points.push_back(tl);
+        msg.shape.polygon.points.push_back(bl);
+        msg.shape.polygon.points.push_back(br);
+    }
+
+
 //    if (!e->shape())
 //    {
 //        const ed::ConvexHull& ch = e->convexHull();
