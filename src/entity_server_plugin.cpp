@@ -20,7 +20,8 @@ void EntityServerPlugin::initialize(ed::InitData& init)
 
     tue::Configuration& config = init.config;
     config.value("cart_mobidik_width", cart_mobidik_width, tue::REQUIRED); // [m]
-    config.value("cart_mobidik_margin", cart_mobidik_margin, tue::REQUIRED); // [m]
+    config.value("cart_mobidik_upper_margin", cart_mobidik_upper_margin, tue::REQUIRED); // [m]
+    config.value("cart_mobidik_lower_margin", cart_mobidik_lower_margin, tue::REQUIRED); // [m]
 
     publisher_enabled = false;
 
@@ -138,10 +139,9 @@ void EntityServerPlugin::copyEntityToMsg(const ed::EntityConstPtr &e, ropod_ros_
 
     }
 
-    ed::tracking::FeatureProperties property = e->property(feature_properties);
-    // only set shape for rectangular objects
-    if (property.getFeatureProbabilities().get_pRectangle() > property.getFeatureProbabilities().get_pCircle())
+    if (e->id().str().find("-laserTracking") != std::string::npos)
     {
+        ed::tracking::FeatureProperties property = e->property(feature_properties);
         double x, y, w, d, yaw;
         x = property.getRectangle().get_x();
         y = property.getRectangle().get_y();
@@ -304,6 +304,10 @@ std::vector<ed::EntityConstPtr> EntityServerPlugin::getCarts(const std::vector<e
 
 bool EntityServerPlugin::isEntityInPolygon(const ed::EntityConstPtr &entity, const std::vector<geometry_msgs::Point32> &polygon)
 {
+    if (entity->id().str().find("-laserTracking") == std::string::npos)
+    {
+        return false;
+    }
     ed::tracking::FeatureProperties property = entity->property(feature_properties);
     geometry_msgs::Point32 entity_center;
     entity_center.x = property.getRectangle().get_x();
@@ -314,6 +318,10 @@ bool EntityServerPlugin::isEntityInPolygon(const ed::EntityConstPtr &entity, con
 
 bool EntityServerPlugin::isRectangle(const ed::EntityConstPtr &entity)
 {
+    if (entity->id().str().find("-laserTracking") == std::string::npos)
+    {
+        return false;
+    }
     ed::tracking::FeatureProperties property = entity->property(feature_properties);
     if (property.getFeatureProbabilities().get_pRectangle() > property.getFeatureProbabilities().get_pCircle())
     {
@@ -324,6 +332,10 @@ bool EntityServerPlugin::isRectangle(const ed::EntityConstPtr &entity)
 
 bool EntityServerPlugin::isCircle(const ed::EntityConstPtr &entity)
 {
+    if (entity->id().str().find("-laserTracking") == std::string::npos)
+    {
+        return false;
+    }
     ed::tracking::FeatureProperties property = entity->property(feature_properties);
     if (property.getFeatureProbabilities().get_pCircle() > property.getFeatureProbabilities().get_pRectangle())
     {
@@ -353,10 +365,10 @@ void EntityServerPlugin::detectMobiDik(const std::vector<ed::EntityConstPtr> &en
     	/* Detect Mobidik by its dimensions */
     	ed::tracking::FeatureProperties property = e->property (feature_properties);
 		if ( property.getFeatureProbabilities().get_pRectangle() > property.getFeatureProbabilities().get_pCircle() && // Dimension check
-				property.rectangle_.get_d() < cart_mobidik_width + cart_mobidik_margin &&
-				property.rectangle_.get_w() < cart_mobidik_width + cart_mobidik_margin &&
-				( property.rectangle_.get_d() > cart_mobidik_width - cart_mobidik_margin ||
-				  property.rectangle_.get_w() > cart_mobidik_width - cart_mobidik_margin ))
+				property.rectangle_.get_d() < cart_mobidik_width + cart_mobidik_upper_margin &&
+				property.rectangle_.get_w() < cart_mobidik_width + cart_mobidik_upper_margin &&
+				( property.rectangle_.get_d() > cart_mobidik_width - cart_mobidik_lower_margin ||
+				  property.rectangle_.get_w() > cart_mobidik_width - cart_mobidik_lower_margin ))
 		{
 			ROS_DEBUG_STREAM ("Mobidik found for entity = " << e->id() << std::endl);
 			/* NOTE: This "Mobidik" flag is important for visualization.

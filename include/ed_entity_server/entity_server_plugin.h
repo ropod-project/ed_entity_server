@@ -44,7 +44,8 @@ protected:
 
     /* Cart specific parameters */
     double cart_mobidik_width;
-    double cart_mobidik_margin;
+    double cart_mobidik_upper_margin;
+    double cart_mobidik_lower_margin;
 
     std::vector<ed::EntityConstPtr> filterByArea(const std::vector<ed::EntityConstPtr> &entities, const std::vector<geometry_msgs::Point32> &polygon);
     std::vector<ed::EntityConstPtr> filterRectangles(const std::vector<ed::EntityConstPtr> &entities);
